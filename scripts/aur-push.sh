@@ -46,8 +46,14 @@ trap 'rm -rf "$tmp_root"' EXIT
 aur_repo="$tmp_root/aur"
 git clone "$aur_url" "$aur_repo" >/dev/null
 
+if [ ! -d "$aur_repo/.git" ]; then
+  echo "Error: failed to clone AUR repository: $aur_url" >&2
+  exit 1
+fi
+
 # Sync package metadata files only (exclude build outputs and local source trees).
 rsync -a --delete \
+  --exclude '.git/' \
   --exclude 'src/' \
   --exclude 'pkg/' \
   --exclude '*.pkg.tar.*' \
@@ -58,6 +64,12 @@ rsync -a --delete \
   "$pkg_dir/" "$aur_repo/"
 
 pushd "$aur_repo" >/dev/null
+
+# Keep first push on AUR's expected branch name.
+if ! git rev-parse --verify HEAD >/dev/null 2>&1; then
+  git checkout -b master >/dev/null 2>&1 || true
+fi
+
 git add -A
 
 if git diff --cached --quiet; then
