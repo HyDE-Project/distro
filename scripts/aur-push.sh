@@ -54,7 +54,7 @@ rsync -a \
 
 pushd "$meta_repo" >/dev/null
 makepkg -o --nodeps --skippgpcheck >/dev/null
-makepkg --printsrcinfo > "$OLDPWD/$pkg_dir/.SRCINFO"
+makepkg --printsrcinfo >"$OLDPWD/$pkg_dir/.SRCINFO"
 popd >/dev/null
 
 aur_repo="$tmp_root/aur"
