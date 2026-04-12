@@ -36,12 +36,26 @@ if [ ! -f "$pkg_dir/PKGBUILD" ]; then
 	exit 1
 fi
 
-pushd "$pkg_dir" >/dev/null
-makepkg --printsrcinfo >.SRCINFO
-popd >/dev/null
-
 tmp_root=$(mktemp -d)
 trap 'rm -rf "$tmp_root"' EXIT
+
+# Build SRCINFO in an isolated temp dir so VCS pkgver is resolved and
+# local stale src trees do not leak into AUR metadata.
+meta_repo="$tmp_root/meta"
+mkdir -p "$meta_repo"
+rsync -a \
+	--exclude 'src/' \
+	--exclude 'pkg/' \
+	--exclude '*.pkg.tar.*' \
+	--exclude '*.tar.gz' \
+	--exclude '*.tar.xz' \
+	--exclude '*.tar.zst' \
+	"$pkg_dir/" "$meta_repo/"
+
+pushd "$meta_repo" >/dev/null
+makepkg -o --nodeps --skippgpcheck >/dev/null
+makepkg --printsrcinfo > "$OLDPWD/$pkg_dir/.SRCINFO"
+popd >/dev/null
 
 aur_repo="$tmp_root/aur"
 git clone "$aur_url" "$aur_repo" >/dev/null
