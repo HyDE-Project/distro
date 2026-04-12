@@ -1,2 +1,2 @@
 # distro
-Host Builds for binaries. Yey
+Host Build Scripts for Distros. Yey
