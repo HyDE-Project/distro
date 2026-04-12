@@ -1,0 +1,55 @@
+name: Arch Packages CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  validate-pkgbuilds:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
+
+    steps:
+      - name: Install tools
+        run: |
+          pacman -Syu --noconfirm
+          pacman -S --noconfirm --needed base-devel git pacman-contrib
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate PKGBUILDs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t pkgbuilds < <(find arch -type f -name PKGBUILD | sort)
+          if [ ${#pkgbuilds[@]} -eq 0 ]; then
+            echo "No PKGBUILD files found under arch/"
+            exit 1
+          fi
+
+          for pkgbuild in "${pkgbuilds[@]}"; do
+            pkgdir=$(dirname "$pkgbuild")
+            echo "==> Checking ${pkgdir}"
+            pushd "$pkgdir" >/dev/null
+
+            # Static PKGBUILD parse + metadata generation
+            makepkg --printsrcinfo > .SRCINFO
+            makepkg --packagelist >/dev/null
+
+            # Ensure source retrieval/extraction/prepare works (no full build)
+            makepkg -o --nobuild --nodeps --skippgpcheck
+
+            popd >/dev/null
+          done
+
+      - name: Upload generated SRCINFO
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: srcinfo-files
+          path: |
+            arch/**/.SRCINFO
+          if-no-files-found: ignore

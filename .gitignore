@@ -1,0 +1,26 @@
+# Arch package build artifacts
+**/src/
+**/pkg/
+**/*.pkg.tar.zst
+**/*.pkg.tar.zst.sig
+**/*.pkg.tar.xz
+**/*.pkg.tar.gz
+**/*.tar.gz
+**/*.tar.xz
+**/*.tar.zst
+/arch/hyprquery/hyprquery/
+
+# makepkg temp data and metadata
+**/*.log
+**/.SRCINFO.tmp
+
+# Ignore hidden files/dirs by default, then allow required repo metadata.
+.*
+!.gitignore
+!.github/
+!.github/**
+!arch/**/.SRCINFO
+!arch/**/PKGBUILD
+
+# editor/system
+.DS_Store
