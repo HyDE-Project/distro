@@ -20,9 +20,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Prepare non-root builder
+        shell: bash
+        run: |
+          id -u builder >/dev/null 2>&1 || useradd -m builder
+          chown -R builder:builder "$GITHUB_WORKSPACE"
+
       - name: Validate PKGBUILDs
         shell: bash
         run: |
+          set -euo pipefail
+          su - builder -c "cd '$GITHUB_WORKSPACE' && bash -s" <<'EOF'
           set -euo pipefail
           mapfile -t pkgbuilds < <(find arch -type f -name PKGBUILD | sort)
           if [ ${#pkgbuilds[@]} -eq 0 ]; then
@@ -44,6 +52,7 @@ jobs:
 
             popd >/dev/null
           done
+          EOF
 
       - name: Upload generated SRCINFO
         if: always()
