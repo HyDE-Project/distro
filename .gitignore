@@ -8,7 +8,7 @@
 **/*.tar.gz
 **/*.tar.xz
 **/*.tar.zst
-/arch/hyprquery/hyprquery/
+/arch/hyprquery-git/hyprquery/
 
 # makepkg temp data and metadata
 **/*.log
@@ -19,6 +19,8 @@
 !.gitignore
 !.github/
 !.github/**
+!scripts/
+!scripts/**
 !arch/**/.SRCINFO
 !arch/**/PKGBUILD
 
