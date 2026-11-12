@@ -1,0 +1,25 @@
+name: Fedora tools CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  build-tools:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build and install Fedora tools
+        run: |
+          docker run --rm \
+            -v "$GITHUB_WORKSPACE:/workspace:ro" \
+            -w /workspace \
+            fedora:45 \
+            bash -euo pipefail -c '
+              PREFIX=/tmp/hyde-tools ./fedora/install-tools.sh
+              test -x /tmp/hyde-tools/bin/hyq
+              test -x /tmp/hyde-tools/bin/awww
+              test -x /tmp/hyde-tools/bin/awww-daemon
+            '

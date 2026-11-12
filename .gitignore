@@ -28,3 +28,8 @@
 .DS_Store
 .*
 *
+!fedora/
+!fedora/**
+!.github/
+!.github/workflows/
+!.github/workflows/fedora-tools-ci.yml
